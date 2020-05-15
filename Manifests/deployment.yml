@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: user-container
-          image: bollygame94/microserv-assign:user-api-withoutdb
+          image: bollygame94/microserv-assign:users-api-withoutdb
           ports:
             - containerPort: 80
