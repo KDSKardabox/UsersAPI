@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -46,7 +47,7 @@ namespace UsersAPI
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserDbContext dbContext)
+    public async Task Configure(IApplicationBuilder app, IWebHostEnvironment env, UserDbContext dbContext)
     {
       if (env.IsDevelopment())
       {
@@ -54,6 +55,14 @@ namespace UsersAPI
       }
 
       dbContext.Database.EnsureCreated();
+
+      var testUser = await dbContext.Users.SingleOrDefaultAsync(b => b.Id == 1);
+      if (testUser == null)
+      {
+        dbContext.Users.Add(new User { Name = "Joe Dark", Age = 20, Email = "joe@micro.com" });
+        dbContext.SaveChanges();
+      }
+
 
       app.UseRouting();
 
