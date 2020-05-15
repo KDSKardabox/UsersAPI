@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using UsersAPI.DatabaseContext;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace UsersAPI.Controllers
 {
@@ -12,18 +6,10 @@ namespace UsersAPI.Controllers
   [Route("[controller]")]
   public class UsersController : ControllerBase
   {
-
-    private UserDbContext _dbContext;
-
-    public UsersController(UserDbContext dbContext)
-    {
-      _dbContext = dbContext;
-    }
-
     [HttpGet("{id}")]
     public User Get(int id)
     {
-      return _dbContext.Users.FirstOrDefault(user => user.Id == id);
+      return new User() { Id = 1, Name = "John Doe", Age = 21, Email = "balle@nodb.com" };
     }
   }
 }

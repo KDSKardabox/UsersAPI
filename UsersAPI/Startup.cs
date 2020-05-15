@@ -20,15 +20,11 @@ namespace UsersAPI
     {
       Configuration = configuration;
     }
-
     public IConfiguration Configuration { get; }
 
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-      services.AddDbContext<UserDbContext>(opts =>
-        opts.UseSqlServer(Configuration["ConnectionStrings:DatabaseConnection"]));
-      services.AddScoped<UserDbContext>();
       services.AddSingleton<ITracer>(serviceProvider =>
         {
           string serviceName = Assembly.GetEntryAssembly().GetName().Name;
@@ -46,14 +42,12 @@ namespace UsersAPI
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserDbContext dbContext)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
       if (env.IsDevelopment())
       {
         app.UseDeveloperExceptionPage();
       }
-
-      dbContext.Database.EnsureCreated();
 
       app.UseRouting();
 
