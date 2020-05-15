@@ -10,7 +10,6 @@ using Jaeger;
 using Jaeger.Samplers;
 using OpenTracing;
 using OpenTracing.Util;
-using UsersAPI.DatabaseContext;
 
 namespace UsersAPI
 {
