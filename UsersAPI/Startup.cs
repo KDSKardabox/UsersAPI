@@ -17,6 +17,17 @@ namespace UsersAPI
 {
   public class Startup
   {
+    private async Task SeedData(UserDbContext dbContext)
+    {
+      dbContext.Database.EnsureCreated();
+
+      var testUser = await dbContext.Users.SingleOrDefaultAsync(b => b.Id == 1);
+      if (testUser == null)
+      {
+        dbContext.Users.Add(new User { Name = "Joe Dark", Age = 20, Email = "joe@micro.com" });
+        dbContext.SaveChanges();
+      }
+    }
     public Startup(IConfiguration configuration)
     {
       Configuration = configuration;
@@ -47,22 +58,14 @@ namespace UsersAPI
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public async Task Configure(IApplicationBuilder app, IWebHostEnvironment env, UserDbContext dbContext)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserDbContext dbContext)
     {
       if (env.IsDevelopment())
       {
         app.UseDeveloperExceptionPage();
       }
 
-      dbContext.Database.EnsureCreated();
-
-      var testUser = await dbContext.Users.SingleOrDefaultAsync(b => b.Id == 1);
-      if (testUser == null)
-      {
-        dbContext.Users.Add(new User { Name = "Joe Dark", Age = 20, Email = "joe@micro.com" });
-        dbContext.SaveChanges();
-      }
-
+      SeedData(dbContext).Wait();
 
       app.UseRouting();
 
