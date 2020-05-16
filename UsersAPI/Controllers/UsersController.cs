@@ -1,5 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 using UsersAPI.DatabaseContext;
 
 
@@ -9,18 +12,37 @@ namespace UsersAPI.Controllers
   [Route("[controller]")]
   public class UsersController : ControllerBase
   {
-
-    private UserDbContext _dbContext;
-
-    public UsersController(UserDbContext dbContext)
+    public UsersController(IConfiguration configuration)
     {
-      _dbContext = dbContext;
+      Configuration = configuration;
     }
 
+    public IConfiguration Configuration { get; }
+
     [HttpGet("{id}")]
-    public User Get(int id)
+    public Object Get(int id)
     {
-      return _dbContext.Users.FirstOrDefault(user => user.Id == id);
+      var connectionString = Configuration["ConnectionStrings:DatabaseConnection"];
+      if (!String.IsNullOrWhiteSpace(connectionString))
+      {
+        var optionsBuilder = new DbContextOptionsBuilder<UserDbContext>();
+        optionsBuilder
+          .UseSqlServer(connectionString, providerOptions => providerOptions.CommandTimeout(60))
+          .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        using (var dbContext = new UserDbContext(optionsBuilder.Options))
+        {
+
+          dbContext.Database.EnsureCreated();
+          var testUser = dbContext.Users.FirstOrDefault(b => b.Id == 1);
+          if (testUser == null)
+          {
+            dbContext.Users.Add(new User { Name = "Joe Dark", Age = 20, Email = "joe@micro.com" });
+            dbContext.SaveChanges();
+          }
+          return dbContext.Users.FirstOrDefault(user => user.Id == id);
+        }
+      }
+      return "Error";
     }
   }
 }

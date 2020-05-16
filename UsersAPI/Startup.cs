@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -11,36 +10,20 @@ using Jaeger;
 using Jaeger.Samplers;
 using OpenTracing;
 using OpenTracing.Util;
-using UsersAPI.DatabaseContext;
 
 namespace UsersAPI
 {
   public class Startup
   {
-    private async Task SeedData(UserDbContext dbContext)
-    {
-      dbContext.Database.EnsureCreated();
-
-      var testUser = await dbContext.Users.SingleOrDefaultAsync(b => b.Id == 1);
-      if (testUser == null)
-      {
-        dbContext.Users.Add(new User { Name = "Joe Dark", Age = 20, Email = "joe@micro.com" });
-        dbContext.SaveChanges();
-      }
-    }
     public Startup(IConfiguration configuration)
     {
       Configuration = configuration;
     }
-
     public IConfiguration Configuration { get; }
 
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-      services.AddDbContext<UserDbContext>(opts =>
-        opts.UseSqlServer(Configuration["ConnectionStrings:DatabaseConnection"]));
-      services.AddScoped<UserDbContext>();
       services.AddSingleton<ITracer>(serviceProvider =>
         {
           string serviceName = Assembly.GetEntryAssembly().GetName().Name;
@@ -58,14 +41,12 @@ namespace UsersAPI
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserDbContext dbContext)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
       if (env.IsDevelopment())
       {
         app.UseDeveloperExceptionPage();
       }
-
-      SeedData(dbContext).Wait();
 
       app.UseRouting();
 

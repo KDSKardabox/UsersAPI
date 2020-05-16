@@ -5,7 +5,7 @@ metadata:
   labels:
     name: user
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     - port: 80
       protocol: TCP
